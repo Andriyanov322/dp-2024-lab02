@@ -1,39 +1,68 @@
-import os
+# logger/log_strategies.py
+
 from abc import ABC, abstractmethod
 from datetime import datetime
+import os
 
 class LogStrategy(ABC):
+    """Базовый класс стратегии логирования"""
+
     @abstractmethod
-    def log(self, message: str) -> None:
-        """Метод для логирования сообщения."""
+    def log(self, message: str, level: str) -> None:
         pass
 
+
 class ConsoleLogStrategy(LogStrategy):
-    def log(self, message: str) -> None:
-        print(message)
+    """Стратегия логирования в консоль"""
+
+    def log(self, message: str, level: str) -> None:
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"{current_time} [{level}] {message}")
+
 
 class FileLogStrategy(LogStrategy):
-    def __init__(self, logs_dir: str) -> None:
-        self.logs_dir = logs_dir
-        timestamp = datetime.now().strftime("%Y-%m-%d.%H-%M-%S")
-        self.filepath = os.path.join(os.getcwd(), logs_dir, f"DP.P1.{timestamp}.log")
+    """Стратегия логирования в файл"""
 
-    def log(self, message: str) -> None:
-        try:
-            with open(self.filepath, 'a') as f:
-                f.write(message + "\n")
-        except Exception as e:
-            print(f"Error logging to file: {e}")
+    def __init__(self, directory=None):
+        # Проверяем, является ли путь папкой
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+            # Генерируем имя файла с меткой времени
+            timestamp = datetime.now().strftime("%Y-%m-%d.%H-%M-%S")
+            filename = f"DP.P1.{timestamp}.log"
+            self.filepath = os.path.join(directory, filename)
+        else:
+            # Если путь не указан, используем текущую директорию
+            timestamp = datetime.now().strftime("%Y-%m-%d.%H-%M-%S")
+            filename = f"DP.P1.{timestamp}.log"
+            self.filepath = os.path.join(os.getcwd(), filename)
 
-class UpperCaseFileLogStrategy(LogStrategy):
-    def __init__(self, logs_dir: str) -> None:
-        self.logs_dir = logs_dir
-        timestamp = datetime.now().strftime("%Y-%m-%d.%H-%M-%S")
-        self.filepath = os.path.join(logs_dir, f"DP.P1.{timestamp}.log")
+    def log(self, message: str, level: str) -> None:
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_message = f"{current_time} [{level}] {message}"
+        with open(self.filepath, 'a') as f:
+            f.write(log_message + "\n")
 
-    def log(self, message: str) -> None:
-        try:
-            with open(self.filepath, 'a') as f:
-                f.write(message.upper() + "\n")
-        except Exception as e:
-            print(f"Error logging to file: {e}")
+
+class UpperFileLogStrategy(LogStrategy):
+    """Стратегия логирования в файл с сообщениями в верхнем регистре"""
+
+    def __init__(self, directory=None):
+        # Проверяем, является ли путь папкой
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+            # Генерируем имя файла с меткой времени
+            timestamp = datetime.now().strftime("%Y-%m-%d.%H-%M-%S")
+            filename = f"DP.P1.{timestamp}.log"
+            self.filepath = os.path.join(directory, filename)
+        else:
+            # Если путь не указан, используем текущую директорию
+            timestamp = datetime.now().strftime("%Y-%m-%d.%H-%M-%S")
+            filename = f"DP.P1.{timestamp}.log"
+            self.filepath = os.path.join(os.getcwd(), filename)
+
+    def log(self, message: str, level: str) -> None:
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_message = f"{current_time} [{level}] {message}".upper()
+        with open(self.filepath, 'a') as f:
+            f.write(log_message + "\n")

@@ -1,30 +1,35 @@
-import os
-from datetime import datetime
+# logger/logger.py
 
-class Logger:
-    def __init__(self, log_strategy, logs_dir=None):
-        self.log_strategy = log_strategy
-        self.logs_dir = logs_dir
-        if logs_dir:
-            os.makedirs(self.logs_dir, exist_ok=True)
+from .singleton import SingletonMeta
+from .log_strategies import LogStrategy
+from threading import Lock
 
-    def log(self, message: str) -> None:
-        try:
-            self.log_strategy.log(message)
-        except Exception as e:
-            print(f"Error during logging: {e}")
+class Logger(metaclass=SingletonMeta):
+    _lock = Lock()
+
+    def __init__(self, strategy: LogStrategy):
+        self._strategy = strategy
+
+    def set_strategy(self, strategy: LogStrategy) -> None:
+        """Устанавливает новую стратегию логирования"""
+        self._strategy = strategy
+
+    def log(self, message: str, level="INFO") -> None:
+        """Логирует сообщение, используя текущую стратегию"""
+        with Logger._lock:
+            self._strategy.log(message, level)
+
+    def trace(self, message: str) -> None:
+        self.log(message, level="TRACE")
 
     def info(self, message: str) -> None:
-        self.log(f"{self.get_timestamp()} [INFO] {message}")
+        self.log(message, level="INFO")
 
     def warn(self, message: str) -> None:
-        self.log(f"{self.get_timestamp()} [WARN] {message}")
+        self.log(message, level="WARN")
 
     def error(self, message: str) -> None:
-        self.log(f"{self.get_timestamp()} [ERROR] {message}")
+        self.log(message, level="ERROR")
 
     def fatal(self, message: str) -> None:
-        self.log(f"{self.get_timestamp()} [FATAL] {message}")
-
-    def get_timestamp(self) -> str:
-        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.log(message, level="FATAL")

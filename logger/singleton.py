@@ -1,3 +1,5 @@
+# logger/singleton.py
+
 import threading
 
 class SingletonMeta(type):

@@ -3,10 +3,6 @@
 name: Python Tests
 
 on:
-  push:
-    branches:
-      - feature  # Запускать тесты на ветке feature
-      - main     # Запускать тесты на ветке main
   pull_request:
     branches:
       - main     # Запускать тесты на PR к ветке main

@@ -1,40 +1,27 @@
 from abc import ABC, abstractmethod
 from .writer_interface import Writer
+from ..log_levels import LogLevel
 
 class LoggerInterface(ABC):
-    """Интерфейс для управления процессом логирования, определяющий основные методы логирования."""
+    """Интерфейс для управления процессом логирования, определяющий основной метод логирования."""
 
     @abstractmethod
     def set_writer(self, writer: Writer) -> None:
-        """Устанавливает стратегию записи логов."""
+        """
+        Устанавливает стратегию записи логов.
+
+        Args:
+            writer (Writer): Новая стратегия вывода для записи логов.
+        """
         pass
 
     @abstractmethod
-    def log(self, message: str, level: str) -> None:
-        """Логирует сообщение с заданным уровнем."""
-        pass
+    def log(self, message: str, level: LogLevel = LogLevel.INFO) -> None:
+        """
+        Логирует сообщение с указанным уровнем.
 
-    @abstractmethod
-    def log_trace(self, message: str) -> None:
-        """Логирует сообщение уровня TRACE."""
-        pass
-
-    @abstractmethod
-    def log_info(self, message: str) -> None:
-        """Логирует сообщение уровня INFO."""
-        pass
-
-    @abstractmethod
-    def log_warning(self, message: str) -> None:
-        """Логирует сообщение уровня WARNING."""
-        pass
-
-    @abstractmethod
-    def log_error(self, message: str) -> None:
-        """Логирует сообщение уровня ERROR."""
-        pass
-
-    @abstractmethod
-    def log_fatal(self, message: str) -> None:
-        """Логирует сообщение уровня FATAL."""
+        Args:
+            message (str): Сообщение для записи в лог.
+            level (LogLevel): Уровень логирования (по умолчанию INFO).
+        """
         pass

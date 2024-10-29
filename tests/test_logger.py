@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, mock_open
 from logger import Logger, ConsoleWriter, FileWriter, UpperFileWriter
+from logger.log_levels import LogLevel
 import re
 
 class TestLogger(unittest.TestCase):
@@ -15,21 +16,21 @@ class TestLogger(unittest.TestCase):
 
     def test_log_info_console(self):
         with patch('builtins.print') as mock_print:
-            self.console_logger.log_info("Test info message")
+            self.console_logger.log("Test info message", level=LogLevel.INFO)
             expected_message = self._build_expected_message("INFO", "Test info message")
             actual_message = mock_print.call_args[0][0]
             self.assertRegex(actual_message, expected_message)
 
     def test_log_warning_console(self):
         with patch('builtins.print') as mock_print:
-            self.console_logger.log_warning("Test warning message")
+            self.console_logger.log("Test warning message", level=LogLevel.WARN)
             expected_message = self._build_expected_message("WARN", "Test warning message")
             actual_message = mock_print.call_args[0][0]
             self.assertRegex(actual_message, expected_message)
 
     def test_log_error_console(self):
         with patch('builtins.print') as mock_print:
-            self.console_logger.log_error("Test error message")
+            self.console_logger.log("Test error message", level=LogLevel.ERROR)
             expected_message = self._build_expected_message("ERROR", "Test error message")
             actual_message = mock_print.call_args[0][0]
             self.assertRegex(actual_message, expected_message)
@@ -39,7 +40,7 @@ class TestLogger(unittest.TestCase):
     def test_log_info_file(self, mock_open, mock_makedirs):
         """Тестирование записи сообщения уровня INFO в файл."""
         file_logger = Logger(writer=FileWriter(directory="test_logs"))
-        file_logger.log_info("Test info message")
+        file_logger.log("Test info message", level=LogLevel.INFO)
 
         expected_message = self._build_expected_message("INFO", "Test info message")
         actual_message = mock_open().write.call_args[0][0]
@@ -50,7 +51,7 @@ class TestLogger(unittest.TestCase):
     def test_log_warning_file(self, mock_open, mock_makedirs):
         """Тестирование записи сообщения уровня WARNING в файл."""
         file_logger = Logger(writer=FileWriter(directory="test_logs"))
-        file_logger.log_warning("Test warning message")
+        file_logger.log("Test warning message", level=LogLevel.WARN)
 
         expected_message = self._build_expected_message("WARN", "Test warning message")
         actual_message = mock_open().write.call_args[0][0]
@@ -61,7 +62,7 @@ class TestLogger(unittest.TestCase):
     def test_log_error_upper_file(self, mock_open, mock_makedirs):
         """Тестирование записи сообщения уровня ERROR в файл с преобразованием в верхний регистр."""
         upper_file_logger = Logger(writer=UpperFileWriter(directory="test_logs"))
-        upper_file_logger.log_error("Test error message")
+        upper_file_logger.log("Test error message", level=LogLevel.ERROR)
 
         expected_message = self._build_expected_message("ERROR", "TEST ERROR MESSAGE")
         actual_message = mock_open().write.call_args[0][0]
@@ -73,7 +74,7 @@ class TestLogger(unittest.TestCase):
         """Тестирование изменения стратегии логирования с консольной на файловую."""
         logger = Logger(writer=ConsoleWriter())
         logger.set_writer(FileWriter(directory="test_logs"))
-        logger.log_info("Test info message in file")
+        logger.log("Test info message in file", level=LogLevel.INFO)
 
         expected_message = self._build_expected_message("INFO", "Test info message in file")
         actual_message = mock_open().write.call_args[0][0]

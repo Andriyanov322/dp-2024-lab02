@@ -1,21 +1,13 @@
-from logger.interfaces.writer_interface import Writer
-from logger.interfaces.logger_interface import LoggerInterface
-from logger.log_levels import LogLevel
+from ..interfaces.logger_interface import LoggerInterface
+from ..interfaces.writer_interface import Writer
+from ..log_levels import LogLevel
+from .singleton import Singleton
 from threading import Lock
 from datetime import datetime
 
-class Logger(LoggerInterface):
-    """Класс логгера, реализующий интерфейс LoggerInterface и паттерн Singleton для логирования сообщений."""
-    _instance = None
-    _lock = Lock()
-
-    def __new__(cls, *args, **kwargs):
-        """Реализация Singleton с использованием метода __new__."""
-        if not cls._instance:
-            with cls._lock:
-                if not cls._instance:
-                    cls._instance = super().__new__(cls)
-        return cls._instance
+class Logger(LoggerInterface, Singleton):
+    """Класс логгера, реализующий интерфейс LoggerInterface для логирования сообщений."""
+    _log_lock = Lock()
 
     def __init__(self, writer: Writer):
         self._writer = writer
@@ -32,7 +24,7 @@ class Logger(LoggerInterface):
     def _log(self, message: str, level: LogLevel) -> None:
         """Приватный метод для логирования события с заданным уровнем."""
         formatted_message = self._format_message(message, level)
-        with Logger._lock:
+        with Logger._log_lock:
             self._writer.write(formatted_message)
 
     def log(self, message: str, level: LogLevel) -> None:

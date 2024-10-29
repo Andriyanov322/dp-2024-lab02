@@ -1,42 +1,40 @@
-# logger/logger_interface.py
-
 from abc import ABC, abstractmethod
-from .log_strategies import LogStrategy
+from .log_strategy_interface import LogOutput
 
-class LoggerInterface(ABC):
-    """Абстрактный интерфейс для логгера, определяющий основные методы логирования."""
+class LogManager(ABC):
+    """Интерфейс для управления процессом логирования, определяющий основные методы логирования."""
 
     @abstractmethod
-    def set_strategy(self, strategy: LogStrategy) -> None:
+    def set_logging_strategy(self, strategy: LogOutput) -> None:
         """Устанавливает стратегию логирования."""
         pass
 
     @abstractmethod
-    def log(self, message: str, level: str) -> None:
-        """Логирует сообщение определённого уровня."""
+    def log_event(self, message: str, level: str) -> None:
+        """Логирует событие с заданным уровнем."""
         pass
 
     @abstractmethod
-    def trace(self, message: str) -> None:
-        """Логирует сообщение уровня TRACE."""
+    def log_trace_event(self, message: str) -> None:
+        """Логирует событие уровня TRACE."""
         pass
 
     @abstractmethod
-    def info(self, message: str) -> None:
-        """Логирует сообщение уровня INFO."""
+    def log_info_event(self, message: str) -> None:
+        """Логирует событие уровня INFO."""
         pass
 
     @abstractmethod
-    def warn(self, message: str) -> None:
-        """Логирует сообщение уровня WARN."""
+    def log_warning_event(self, message: str) -> None:
+        """Логирует событие уровня WARNING."""
         pass
 
     @abstractmethod
-    def error(self, message: str) -> None:
-        """Логирует сообщение уровня ERROR."""
+    def log_error_event(self, message: str) -> None:
+        """Логирует событие уровня ERROR."""
         pass
 
     @abstractmethod
-    def fatal(self, message: str) -> None:
-        """Логирует сообщение уровня FATAL."""
+    def log_fatal_event(self, message: str) -> None:
+        """Логирует событие уровня FATAL."""
         pass

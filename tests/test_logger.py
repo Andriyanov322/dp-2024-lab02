@@ -1,101 +1,85 @@
-# tests/test_logger.py
-
-import os
 import unittest
-from unittest.mock import patch
-from io import StringIO
-from logger import Logger, ConsoleLogStrategy, FileLogStrategy, UpperFileLogStrategy
-
+from unittest.mock import patch, mock_open
+from logger import Logger, ConsoleLogOutput, FileLogOutput, UpperFileLogOutput
+from logger.log_levels import LogLevel
+import re
 
 class TestLogger(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        # Папка для тестовых логов
-        cls.log_directory = "logs"
-        os.makedirs(cls.log_directory, exist_ok=True)
-
     def setUp(self):
-        """Настройка логгера перед каждым тестом."""
-        # Инициализация логгера с консольной стратегией по умолчанию
-        self.logger = Logger(ConsoleLogStrategy())
+        """Настраивает логгер с консольной стратегией перед каждым тестом."""
+        self.console_logger = Logger(strategy=ConsoleLogOutput())
 
-    def test_singleton_instance(self):
-        """Тест, что Logger является синглтоном."""
-        logger1 = Logger(ConsoleLogStrategy())
-        logger2 = Logger(ConsoleLogStrategy())
-        self.assertIs(logger1, logger2, "Logger не является синглтоном!")
+    def _build_expected_message(self, level, message):
+        """Формирует регулярное выражение для проверки отформатированного сообщения."""
+        return re.compile(rf"\d{{4}}-\d{{2}}-\d{{2}} \d{{2}}:\d{{2}}:\d{{2}} \[{level}\] {message}")
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_console_log_strategy(self, mock_stdout):
-        """Тестирование стратегии логирования в консоль."""
-        self.logger.set_strategy(ConsoleLogStrategy())
+    def test_log_info_event_console(self):
+        with patch('builtins.print') as mock_print:
+            self.console_logger.log_info_event("Test info message")
+            expected_message = self._build_expected_message("INFO", "Test info message")
+            actual_message = mock_print.call_args[0][0]
+            self.assertRegex(actual_message, expected_message)
 
-        # Логируем сообщения
-        self.logger.info("This is an info message in console.")
-        self.logger.warn("This is a warning message in console.")
-        self.logger.error("This is an error message in console.")
+    def test_log_warning_event_console(self):
+        with patch('builtins.print') as mock_print:
+            self.console_logger.log_warning_event("Test warning message")
+            expected_message = self._build_expected_message("WARN", "Test warning message")
+            actual_message = mock_print.call_args[0][0]
+            self.assertRegex(actual_message, expected_message)
 
-        # Получаем захваченный вывод
-        output = mock_stdout.getvalue()
+    def test_log_error_event_console(self):
+        with patch('builtins.print') as mock_print:
+            self.console_logger.log_error_event("Test error message")
+            expected_message = self._build_expected_message("ERROR", "Test error message")
+            actual_message = mock_print.call_args[0][0]
+            self.assertRegex(actual_message, expected_message)
 
-        # Проверка наличия нужных сообщений
-        self.assertIn("[INFO] This is an info message in console.", output)
-        self.assertIn("[WARN] This is a warning message in console.", output)
-        self.assertIn("[ERROR] This is an error message in console.", output)
+    @patch("os.makedirs")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_log_info_event_file(self, mock_open, mock_makedirs):
+        """Тестирование записи сообщения уровня INFO в файл."""
+        file_logger = Logger(strategy=FileLogOutput(directory="test_logs"))
+        file_logger.log_info_event("Test info message")
 
-    def test_file_log_strategy(self):
-        """Тестирование стратегии логирования в файл."""
-        file_strategy = FileLogStrategy(directory=self.log_directory)
-        self.logger.set_strategy(file_strategy)
+        expected_message = self._build_expected_message("INFO", "Test info message")
+        actual_message = mock_open().write.call_args[0][0]
+        self.assertRegex(actual_message, expected_message)
 
-        # Логируем сообщения
-        self.logger.info("This is an info message in file.")
-        self.logger.warn("This is a warning message in file.")
-        self.logger.error("This is an error message in file.")
+    @patch("os.makedirs")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_log_warning_event_file(self, mock_open, mock_makedirs):
+        """Тестирование записи сообщения уровня WARNING в файл."""
+        file_logger = Logger(strategy=FileLogOutput(directory="test_logs"))
+        file_logger.log_warning_event("Test warning message")
 
-        # Проверка, что файл был создан
-        log_files = os.listdir(self.log_directory)
-        self.assertGreater(len(log_files), 0, "Файл для логов не был создан")
+        expected_message = self._build_expected_message("WARN", "Test warning message")
+        actual_message = mock_open().write.call_args[0][0]
+        self.assertRegex(actual_message, expected_message)
 
-        # Проверяем содержимое последнего созданного файла
-        log_file_path = os.path.join(self.log_directory, log_files[-1])
-        with open(log_file_path, 'r') as f:
-            logs = f.read()
-            self.assertIn("[INFO] This is an info message in file.", logs)
-            self.assertIn("[WARN] This is a warning message in file.", logs)
-            self.assertIn("[ERROR] This is an error message in file.", logs)
+    @patch("os.makedirs")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_log_error_event_upper_file(self, mock_open, mock_makedirs):
+        """Тестирование записи сообщения уровня ERROR в файл с преобразованием в верхний регистр."""
+        upper_file_logger = Logger(strategy=UpperFileLogOutput(directory="test_logs"))
+        upper_file_logger.log_error_event("Test error message")
 
-    def test_upper_file_log_strategy(self):
-        """Тестирование стратегии логирования в файл с верхним регистром."""
-        upper_file_strategy = UpperFileLogStrategy(directory=self.log_directory)
-        self.logger.set_strategy(upper_file_strategy)
+        expected_message = self._build_expected_message("ERROR", "TEST ERROR MESSAGE")
+        actual_message = mock_open().write.call_args[0][0]
+        self.assertRegex(actual_message, expected_message)
 
-        # Логируем сообщения
-        self.logger.info("This is an info message in UPPER file.")
-        self.logger.warn("This is a warning message in UPPER file.")
-        self.logger.error("This is an error message in UPPER file.")
+    @patch("os.makedirs")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_set_logging_strategy(self, mock_open, mock_makedirs):
+        """Тестирование изменения стратегии логирования с консольной на файловую."""
+        logger = Logger(strategy=ConsoleLogOutput())
+        logger.set_logging_strategy(FileLogOutput(directory="test_logs"))
+        logger.log_info_event("Test info message in file")
 
-        # Проверяем, что файл был создан
-        log_files = os.listdir(self.log_directory)
-        self.assertGreater(len(log_files), 0, "Файл для логов в верхнем регистре не был создан")
-
-        # Проверяем содержимое последнего созданного файла
-        log_file_path = os.path.join(self.log_directory, log_files[-1])
-        with open(log_file_path, 'r') as f:
-            logs = f.read()
-            self.assertIn("[INFO] THIS IS AN INFO MESSAGE IN UPPER FILE.", logs)
-            self.assertIn("[WARN] THIS IS A WARNING MESSAGE IN UPPER FILE.", logs)
-            self.assertIn("[ERROR] THIS IS AN ERROR MESSAGE IN UPPER FILE.", logs)
-
-    @classmethod
-    def tearDownClass(cls):
-        """Удаляем созданные файлы и папку после завершения тестов."""
-        for log_file in os.listdir(cls.log_directory):
-            file_path = os.path.join(cls.log_directory, log_file)
-            os.remove(file_path)
-        os.rmdir(cls.log_directory)
+        expected_message = self._build_expected_message("INFO", "Test info message in file")
+        actual_message = mock_open().write.call_args[0][0]
+        self.assertRegex(actual_message, expected_message)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

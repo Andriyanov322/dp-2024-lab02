@@ -1,15 +1,15 @@
 from datetime import datetime
 import os
-from .log_strategy_interface import LogOutput
+from ..interfaces.writer_interface import Writer
 
-class ConsoleLogOutput(LogOutput):
+class ConsoleWriter(Writer):
     """Стратегия вывода логов в консоль."""
 
     def write(self, message: str) -> None:
         print(message)
 
 
-class FileLogOutput(LogOutput):
+class FileWriter(Writer):
     """Стратегия вывода логов в файл."""
 
     def __init__(self, directory=None):
@@ -29,7 +29,7 @@ class FileLogOutput(LogOutput):
             f.write(message + "\n")
 
 
-class UpperFileLogOutput(FileLogOutput):
+class UpperFileWriter(FileWriter):
     """Стратегия вывода логов в файл, преобразуя текст в верхний регистр."""
 
     def write(self, message: str) -> None:

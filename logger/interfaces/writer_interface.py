@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-class LogOutput(ABC):
-    """Абстрактный базовый класс для вывода логов."""
+class Writer(ABC):
+    """Абстрактный базовый класс для записи логов."""
 
     @abstractmethod
     def write(self, message: str) -> None:

@@ -43,13 +43,13 @@ class Logger(LoggerInterface, Singleton):
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return f"{current_time} [{level.value}] {message}"
 
-    def log(self, message: str, level: LogLevel = LogLevel.INFO) -> None:
+    def log(self, message: str, level: LogLevel) -> None:
         """
         Логирует сообщение с указанным уровнем.
 
         Args:
             message (str): Сообщение для записи в лог.
-            level (LogLevel): Уровень логирования (по умолчанию INFO).
+            level (LogLevel): Уровень логирования (например, INFO, ERROR).
         """
         formatted_message = self._format_message(message, level)
         with Logger._log_lock:

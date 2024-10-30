@@ -16,7 +16,7 @@ class LoggerInterface(ABC):
         pass
 
     @abstractmethod
-    def log(self, message: str, level: LogLevel = LogLevel.INFO) -> None:
+    def log(self, message: str, level: LogLevel) -> None:
         """
         Логирует сообщение с указанным уровнем.
 

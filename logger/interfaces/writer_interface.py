@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class Writer(ABC):
+class IWriter(ABC):
     """Абстрактный базовый класс для записи логов."""
 
     @abstractmethod

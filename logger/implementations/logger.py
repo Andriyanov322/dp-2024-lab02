@@ -1,5 +1,5 @@
 from logger.interfaces.logger_interface import LoggerInterface
-from logger.interfaces.writer_interface import Writer
+from logger.interfaces.writer_interface import IWriter
 from logger.log_levels import LogLevel
 from logger.implementations.singleton import Singleton
 from threading import Lock
@@ -11,21 +11,21 @@ class Logger(LoggerInterface, Singleton):
 
     _log_lock = Lock()  # Блокировка для записи логов
 
-    def __init__(self, writer: Writer):
+    def __init__(self, writer: IWriter):
         """
         Инициализирует логгер с указанной стратегией записи.
 
         Args:
-            writer (Writer): Стратегия вывода, используемая для записи логов.
+            writer (IWriter): Стратегия вывода, используемая для записи логов.
         """
         self._writer = writer
 
-    def set_writer(self, writer: Writer) -> None:
+    def set_writer(self, writer: IWriter) -> None:
         """
         Устанавливает стратегию записи логов.
 
         Args:
-            writer (Writer): Новая стратегия вывода для записи логов.
+            writer (IWriter): Новая стратегия вывода для записи логов.
         """
         self._writer = writer
 

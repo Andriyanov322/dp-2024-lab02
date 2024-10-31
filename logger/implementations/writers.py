@@ -1,8 +1,8 @@
 from datetime import datetime
 import os
-from logger.interfaces.writer_interface import Writer
+from logger.interfaces.writer_interface import IWriter
 
-class ConsoleWriter(Writer):
+class ConsoleWriter(IWriter):
     """Стратегия вывода логов в консоль."""
 
     def write(self, message: str) -> None:
@@ -15,7 +15,7 @@ class ConsoleWriter(Writer):
         print(message)
 
 
-class FileWriter(Writer):
+class FileWriter(IWriter):
     """Стратегия вывода логов в файл."""
 
     def __init__(self, directory: str = None):

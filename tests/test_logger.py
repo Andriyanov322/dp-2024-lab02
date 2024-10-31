@@ -80,8 +80,6 @@ class TestLogger(unittest.TestCase):
 
         expected_message = self._build_expected_message("INFO", "Test info message in file")
         actual_message = re.sub(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} ', '', mock_open().write.call_args[0][0]).strip()
-        print(actual_message)
-        print(expected_message)
         self.assertEqual(actual_message, expected_message)
 
 

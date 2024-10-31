@@ -1,17 +1,17 @@
 from abc import ABC, abstractmethod
-from .writer_interface import Writer
+from .writer_interface import IWriter
 from ..log_levels import LogLevel
 
 class LoggerInterface(ABC):
     """Интерфейс для управления процессом логирования, определяющий основной метод логирования."""
 
     @abstractmethod
-    def set_writer(self, writer: Writer) -> None:
+    def set_writer(self, writer: IWriter) -> None:
         """
         Устанавливает стратегию записи логов.
 
         Args:
-            writer (Writer): Новая стратегия вывода для записи логов.
+            writer (IWriter): Новая стратегия вывода для записи логов.
         """
         pass
 
